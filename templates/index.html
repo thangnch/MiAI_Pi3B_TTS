@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chuyển Văn Bản Sang Âm Thanh</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px; /* Đặt chiều rộng cố định cho container */
+        }
+
+        textarea {
+            width: 100%; /* Chiều rộng 100% của container */
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 10px; /* Giảm khoảng cách với nút */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: vertical; /* Cho phép kéo chiều cao */
+        }
+
+        button {
+            background-color: #ff9800; /* Màu cam */
+            color: white;
+            padding: 15px; /* Giảm padding dọc */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Chiều rộng 100% của container */
+            box-sizing: border-box; /* Tính padding và border vào chiều rộng */
+        }
+
+        button:hover {
+            background-color: #f57c00;
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <textarea id="inputText" placeholder="Nhập văn bản tại đây"></textarea>
+        <button onclick="convertToAudio()">Chuyển sang audio</button>
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+    </div>
+
+    <script>
+        async function convertToAudio() {
+            const text = document.getElementById("inputText").value;
+            const audioPlayer = document.getElementById("audioPlayer");
+
+            if (!text.trim()) {
+                alert("Vui lòng nhập văn bản trước khi chuyển đổi.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/convert_audio", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+
+                    },
+                    body: JSON.stringify({ 'text': text })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(`Lỗi từ server: ${error.message || response.statusText}`);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log(data);
+                console.log(data.filepath);
+                console.log(data.filepath);
+
+                if (data.filepath) {
+                    audioPlayer.src = data.filepath;
+                    audioPlayer.style.display = "block";
+                    audioPlayer.play();
+                } else {
+                    alert("Chuyển đổi không thành công hoặc không nhận được đường dẫn âm thanh.");
+                }
+
+            } catch (error) {
+                alert(`Đã xảy ra lỗi: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
